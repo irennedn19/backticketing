@@ -55,7 +55,8 @@ Route::get('/', [FrontendController::class, 'index'])->name('index');
 Route::get('/kirimcepat', [FrontendController::class, 'kirimcepat'])->name('kirimcepat');
 Route::get('/input_form_kc', [FrontendController::class, 'input_form_kc'])->name('input_form_kc');
 Route::post('/kirimcepat', [FormController::class, 'prosesSimpan'])->name('prosesSimpan');
-Route::get('/detail_ticket_kc', [FormController::class, 'detail_ticket_kc'])->name('detail_ticket_kc');
+Route::get('/detail_ticket_kc/{id}', [FormController::class, 'detail_ticket_kc'])->name('detail_ticket_kc');
+
 
 // Route::get('/cari-ticket', [FrontendController::class, 'searchTicket'])->name('searchTicket');
 // Route::get('/cari-ticket', [FrontendController::class, 'searchTicketLogin'])->name('searchTicketLogin');
@@ -76,17 +77,17 @@ Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
 Route::get('/home', [FrontendController::class, 'home'])->middleware(['auth', 'verified'])->name('home');
 
 
-    // Route::group(['prefix' => 'portal', 'middleware' => ['web']], function () {
-    //     Route::get('/login-portal', [UserPortalAuthController::class, 'showLoginForm'])->name('user_portal.login');
-    //     Route::post('/login-portal', [UserPortalAuthController::class, 'loginPortal'])->name('loginPortal');
-    //     Route::post('/logout-portal', [UserPortalAuthController::class, 'logout'])->name('user_portal.logout');
+    //Route::group(['prefix' => 'portal', 'middleware' => ['web']], function () {
+        //Route::get('/login-portal', [UserPortalAuthController::class, 'showLoginForm'])->name('user_portal.login');
+        //Route::post('/login-portal', [UserPortalAuthController::class, 'loginPortal'])->name('loginPortal');
+        //Route::post('/logout-portal', [UserPortalAuthController::class, 'logout'])->name('user_portal.logout');
     
-    //     Route::middleware('auth:users_portal')->group(function () {
-    //         Route::get('/backoffice', function () {
-    //             return view('back.backoffice');
-    //         })->name('user_portal.dashboard');
-    //     });
-    // });
+        //Route::middleware('auth:users_portal')->group(function () {
+            //Route::get('/backoffice', function () {
+                //return view('back.backoffice');
+             //})->name('user_portal.dashboard');
+         //});
+     //});
     
 
 
@@ -105,7 +106,15 @@ Route::get('/home', [FrontendController::class, 'home'])->middleware(['auth', 'v
 
 
 
+
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+ Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+ Route::get('/login', function () {
+     return redirect('/login/portal'); // Atau '/login/bo' sesuai default kamu
+ })->name('login');
+
 
 Route::get('/login', function () {
     return redirect('/login/portal'); // Atau '/login/bo' sesuai default kamu
