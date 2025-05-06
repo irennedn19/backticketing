@@ -3,6 +3,7 @@
 use App\Models\Ticket;
 use App\Models\Permission;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\TopicKategori;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatController;
@@ -321,7 +322,7 @@ Route::middleware('guest:bo')->group(function () {
         // })->name('login');
     Route::get('/login/bo', [BoLoginController::class, 'showLoginForm'])->name('login.bo');
     Route::post('/login/bo', [BoLoginController::class, 'login']);
-});    
+});
 
 Route::middleware(['auth:portal'])->group(function () {
     Route::get('/home', [PortalDashboardController::class, 'index'])->name('home');
@@ -365,6 +366,10 @@ Route::middleware(['auth:portal'])->group(function () {
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::get('chatPortal/{id}', [UserController::class, 'chatUser'])->name('chatPortal');
+
+    Route::get('/notifications', [ChatController::class, 'getNotifications']);
+    Route::post('/notifications/mark-all-read', [ChatController::class, 'markAllAsRead']);
+
     // Route::get('/messages', [ChatController::class, 'fetchMessages']);
     // Route::post('/messages', [ChatController::class, 'sendMessage']);
 

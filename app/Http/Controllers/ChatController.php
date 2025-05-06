@@ -49,11 +49,12 @@
 
 
 use App\Models\Message;
+use App\Models\User;
+use App\Notifications\MessageNotification;
 use Illuminate\Http\Request;
 
 use App\Events\ChatMessageSent;
 use App\Events\MessageSendEvent;
-use App\Events\MessageSentEvent;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -86,26 +87,49 @@ class ChatController extends Controller
 
 
     public function sendMessage(Request $request)
-{
-    $user = auth('bo')->check() ? auth('bo')->user() : auth('portal')->user();
- // atau 'portal' tergantung login
+    {
+        $user = auth('bo')->check() ? auth('bo')->user() : auth('portal')->user();
+    // atau 'portal' tergantung login
 
-    $request->validate([
-        'receiver_id' => 'required|exists:users,id', // atau user_portals
-        'ticket_id' => 'required|exists:tickets,id',
-        'message' => 'required|string',
-    ]);
+        $request->validate([
+            'receiver_id' => 'required|exists:users,id', // atau user_portals
+            'ticket_id' => 'required|exists:tickets,id',
+            'message' => 'required|string',
+        ]);
 
-    $message = Message::create([
-        'ticket_id' => $request->ticket_id,
-        'sender_id' => $user->id,
-        'receiver_id' => $request->receiver_id,
-        'message' => $request->message,
-    ]);
+        $message = Message::create([
+            'ticket_id' => $request->ticket_id,
+            'sender_id' => $user->id,
+            'receiver_id' => $request->receiver_id,
+            'message' => $request->message,
+        ]);
 
-    broadcast(new MessageSendEvent($message))->toOthers();
+        broadcast(new MessageSendEvent($message))->toOthers();
 
-    return response()->json(['message' => $message]);
-}
+        $receiver = User::find($request->receiver_id);
+        $receiver->notify(new MessageNotification($message));
+
+        return response()->json(['message' => $message]);
+    }
+
+    public function getNotification()
+    {
+        $user = auth('bo')->check() ? auth('bo')->user() : auth('portal')->user();
+
+        return response()->json([
+            'notification' => $user->unreadNotification
+        ]);
+    }
+
+    public function markAllAsRead()
+    {
+        $user = auth('bo')->check() ? auth('bo')->user() : auth('portal')->user();
+
+        $user->unreadNotification->markAsRead();
+
+        return response()->json([
+            'message' => 'All notification marked as read.'
+        ]);
+    }
 
 }

@@ -7,6 +7,9 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <!-- AJAX Notifikasi -->
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
 		<link rel="shortcut icon" type="image/x-icon" href="{{ asset('front/assets/img/logo/icon-isi.png') }}">
         <!-- Place favicon.ico in the root directory -->
 
@@ -91,28 +94,15 @@
                                 <div class="notification">
                                     <div class="nav-item">
                                         <i class="lni lni-alarm" id="notificationIcon"></i>
-                                        <span class="badge">3</span>
+                                        <span class="badge" id="notificationBadge">0</span>
                                     </div>
                                     <div class="dropdown-menu" id="notificationDropdown">
                                         <div class="dropdown-header">
                                             <span>Notifications</span>
-                                            <a href="#" class="mark-read">Mark All As Read</a>
+                                            <a href="#" class="mark-read" onclick="markAllAsRead()">Mark All As Read</a>
                                         </div>
-                                        <ul class="notification-list">
-                                            <li>
-                                                <i class="lni lni-code"></i>
-                                                <div class="notification-text">
-                                                    <p>Permohonan ditutup</p>
-                                                    <small>2 MIN AGO</small>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <i class="lni lni-user"></i>
-                                                <div class="notification-text">
-                                                    <p>Permohonan sedang diproses</p>
-                                                    <small>10 HOURS AGO</small>
-                                                </div>
-                                            </li>
+                                        <ul class="notification-list" id="notificationList">
+                                            
                                         </ul>
                                         <div class="dropdown-footer">
                                             <a href="#">View All</a>
@@ -646,7 +636,58 @@
                     dropdown.style.display = "none";
                 }
             });
-
         </script>
+
+        <!-- NOTIFICATION -->
+        <script>
+            function loadNotifications() {
+                fetch('/notifications')
+                    .then(response => response.json())
+                    .then(data => {
+                        const badge = document.getElementById('notificationBadge');
+                        const list = document.getElementById('notificationList');
+
+                        // Update badge
+                        badge.textContent = data.length;
+
+                        // Kosongkan list
+                        list.innerHTML = '';
+
+                        // Tambahkan notifikasi baru
+                        data.forEach(notification => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <i class="lni lni-comments"></i>
+                                <div class="notification-text">
+                                    <p>${notification.data.message}</p>
+                                    <small>Dari ID ${notification.data.sender_id}</small>
+                                </div>
+                            `;
+                            list.appendChild(li);
+                        });
+                    });
+            }
+
+            // Polling setiap 5 detik
+            setInterval(loadNotifications, 5000);
+
+            // Fungsi untuk menandai semua sebagai sudah dibaca
+            function markAllAsRead() {
+                fetch('/notifications/mark-all-read', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        loadNotifications(); // Refresh notifikasi
+                    }
+                });
+            }
+
+            // Muat saat pertama kali
+            loadNotifications();
+            </script>
     </body>
 </html>

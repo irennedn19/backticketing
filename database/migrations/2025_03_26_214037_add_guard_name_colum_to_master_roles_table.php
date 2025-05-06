@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('master_roles', function (Blueprint $table) {
-            $table->string('name', 100)->after('id');
-            $table->string('guard_name', 255)->after('name');
+            // $table->string('name', 100)->after('id');
+            // $table->string('guard_name', 255)->after('name');
+            if (!Schema::hasColumn('master_roles', 'guard_name')) {
+                $table->string('guard_name')->nullable()->after('name');
+            }
         });
     }
 
